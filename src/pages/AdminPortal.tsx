@@ -5,14 +5,17 @@ import AdminDashboard from "@/components/admin/AdminDashboard";
 import UserManagement from "@/components/admin/UserManagement";
 import TransactionMonitor from "@/components/admin/TransactionMonitor";
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface AdminPortalProps {
+  section?: string;
+}
+
 // This component serves as a shell for admin portal sections
-const AdminPortal = () => {
+const AdminPortal = ({ section }: AdminPortalProps) => {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const { section } = useParams();
   
   // Redirect if not authenticated or not an admin
   useEffect(() => {

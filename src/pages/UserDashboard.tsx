@@ -5,14 +5,17 @@ import Dashboard from "@/components/dashboard/Dashboard";
 import TransactionHistory from "@/components/dashboard/TransactionHistory";
 import NewTransaction from "@/components/dashboard/NewTransaction";
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface UserDashboardProps {
+  section?: string;
+}
+
 // This component serves as a shell for user dashboard sections
-const UserDashboard = () => {
+const UserDashboard = ({ section }: UserDashboardProps) => {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const { section } = useParams();
   
   // Redirect if not authenticated or if an admin trying to access user dashboard
   useEffect(() => {

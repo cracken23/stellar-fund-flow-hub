@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             name: "John Doe",
             email: "user@example.com",
             password: "password123",
-            role: "user",
+            role: "user" as const,
             accountNumber: "10000001",
             balance: 5000.00,
           },
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             name: "Admin User",
             email: "admin@example.com",
             password: "admin123",
-            role: "admin",
+            role: "admin" as const,
             accountNumber: "10000002",
             balance: 10000.00,
           }
@@ -97,13 +97,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Remove password before storing in state
       const { password: _, ...safeUser } = foundUser;
       
-      setUser(safeUser);
-      localStorage.setItem("bankEaseUser", JSON.stringify(safeUser));
+      // Ensure the role is properly typed
+      const typedUser = {
+        ...safeUser,
+        role: safeUser.role as "user" | "admin"
+      };
+      
+      setUser(typedUser);
+      localStorage.setItem("bankEaseUser", JSON.stringify(typedUser));
       
       toast.success("Login successful!");
       
       // Redirect based on role
-      if (safeUser.role === "admin") {
+      if (typedUser.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/dashboard");
@@ -136,7 +142,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name,
         email,
         password,
-        role: "user",
+        role: "user" as const,
         accountNumber: `1000${(10000 + users.length).toString().slice(1)}`,
         balance: 1000.00, // Default starting balance
       };

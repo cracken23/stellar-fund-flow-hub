@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getAllUsers, getAllTransactions } from "@/utils/mockData";
 import { Transaction, User } from "@/utils/mockData";
 import { Button } from "@/components/ui/button";
-import { BarChart, LineChart } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Link } from "react-router-dom";
 import { ArrowRight, CreditCard, User as UserIcon, ArrowLeftRight } from "lucide-react";
 
@@ -147,14 +148,16 @@ const AdminDashboard = () => {
           <CardDescription>Last 7 days transaction volume</CardDescription>
         </CardHeader>
         <CardContent>
-          <BarChart 
-            data={getTransactionsByDay()} 
-            index="name"
-            categories={["Credits", "Debits"]}
-            colors={["#36B37E", "#FF5630"]}
-            valueFormatter={(value) => `$${value.toFixed(2)}`}
-            className="h-80"
-          />
+          <ChartContainer config={{}} className="h-80">
+            <BarChart data={getTransactionsByDay()}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="Credits" fill="#36B37E" />
+              <Bar dataKey="Debits" fill="#FF5630" />
+            </BarChart>
+          </ChartContainer>
         </CardContent>
       </Card>
 
