@@ -1,0 +1,87 @@
+
+Azure SQL Database Connection Instructions
+========================================
+
+1. Prerequisites
+---------------
+- Azure account with active subscription
+- Azure SQL Database instance
+- Node.js installed on your system
+- SQL Server Management Studio (SSMS) or Azure Data Studio
+
+2. Create Azure SQL Database
+---------------------------
+a. Log in to Azure Portal (portal.azure.com)
+b. Create new SQL Database resource
+   - Select subscription and resource group
+   - Choose server or create new one
+   - Set database name
+   - Configure compute + storage
+   - Set admin credentials
+   - Note down connection string
+
+3. Configure Firewall Rules
+--------------------------
+a. Go to database's Networking settings
+b. Add client IP address
+c. Enable "Allow Azure services" if deploying to Azure
+
+4. Install Required Dependencies
+------------------------------
+npm install mssql
+npm install dotenv
+
+5. Database Connection Setup
+---------------------------
+a. Create connection configuration in your backend:
+
+const config = {
+    server: 'your-server.database.windows.net',
+    database: 'your-database-name',
+    user: 'your-username',
+    password: 'your-password',
+    options: {
+        encrypt: true,
+        enableArithAbort: true
+    }
+};
+
+b. Test connection:
+
+const sql = require('mssql');
+
+async function testConnection() {
+    try {
+        await sql.connect(config);
+        console.log('Connected to Azure SQL Database');
+    } catch (err) {
+        console.error('Database connection failed:', err);
+    }
+}
+
+6. Security Best Practices
+-------------------------
+- Store connection strings in environment variables
+- Use Azure Key Vault for production credentials
+- Implement connection pooling
+- Use Prepared Statements for queries
+- Regularly rotate database credentials
+
+7. Deployment Steps
+------------------
+a. Set up environment variables in Azure App Service
+b. Update connection string in application settings
+c. Deploy backend application
+d. Test database connectivity
+e. Monitor performance in Azure Portal
+
+8. Troubleshooting
+-----------------
+- Check firewall rules
+- Verify connection string
+- Ensure proper credentials
+- Check network connectivity
+- Review Azure SQL logs
+
+For detailed documentation, visit:
+https://learn.microsoft.com/en-us/azure/azure-sql/database/connect-query-nodejs
