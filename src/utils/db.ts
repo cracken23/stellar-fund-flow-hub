@@ -1,51 +1,35 @@
 
-import sql from 'mssql';
+// Mock implementation for browser environment
+// In a real application, these calls would be made to a backend API
 
-// Configuration object based on environment variables
-const config = {
-  server: process.env.SQL_SERVER || '',
-  database: process.env.SQL_DATABASE || '',
-  user: process.env.SQL_USERNAME || '',
-  password: process.env.SQL_PASSWORD || '',
-  port: parseInt(process.env.SQL_PORT || '1433'),
+interface DbConfig {
+  server: string;
+  database: string;
+  user: string;
+  password: string;
+  port: number;
   options: {
-    encrypt: process.env.SQL_ENCRYPT === 'true',
-    trustServerCertificate: false,
-    enableArithAbort: true
-  }
-};
+    encrypt: boolean;
+    trustServerCertificate: boolean;
+    enableArithAbort: boolean;
+  };
+}
 
-const pool = new sql.ConnectionPool(config);
-const poolConnect = pool.connect();
-
-poolConnect.catch(err => {
-  console.error('SQL Connection Error:', err);
-});
+interface QueryResult {
+  recordset: any[];
+}
 
 export const getConnection = async () => {
-  try {
-    return await poolConnect;
-  } catch (error) {
-    console.error('Failed to get SQL connection:', error);
-    throw error;
-  }
+  console.log('Mock database connection requested');
+  return {};
 };
 
-export const executeQuery = async (queryText: string, params: any[] = []) => {
-  try {
-    const conn = await getConnection();
-    const request = new sql.Request(conn);
-    
-    params.forEach((param, index) => {
-      request.input(`param${index}`, param);
-    });
-    
-    const result = await request.query(queryText);
-    return result.recordset;
-  } catch (error) {
-    console.error('Query execution error:', error);
-    throw error;
-  }
+export const executeQuery = async (queryText: string, params: any[] = []): Promise<any[]> => {
+  console.log('Mock query execution:', queryText, params);
+  
+  // In a real application, this would make an API call to the backend
+  // For now, we're returning mock data
+  return [];
 };
 
 export default {
