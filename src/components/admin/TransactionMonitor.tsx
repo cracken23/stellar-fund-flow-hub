@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { Transaction, getAllTransactions, getAllUsers } from "@/utils/mockData";
 import { format } from "date-fns";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User } from "@/utils/mockData";
+import { User, Transaction } from "@/types/banking";
+import { getAllTransactions, getAllUsers } from "@/services/api";
 
 const TransactionMonitor = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -17,19 +17,28 @@ const TransactionMonitor = () => {
   const [filter, setFilter] = useState<"all" | "credit" | "debit" | "completed" | "pending" | "failed">("all");
 
   useEffect(() => {
-    // Load transactions
-    const allTransactions = getAllTransactions();
-    setTransactions(allTransactions);
-    setFilteredTransactions(allTransactions);
+    // Load data
+    const fetchData = async () => {
+      try {
+        // Load transactions
+        const allTransactions = await getAllTransactions();
+        setTransactions(allTransactions);
+        setFilteredTransactions(allTransactions);
+        
+        // Create user lookup map
+        const allUsers = await getAllUsers();
+        const userMap: Record<string, User> = {};
+        allUsers.forEach(user => {
+          userMap[user.id] = user;
+          userMap[user.accountNumber] = user;
+        });
+        setUsers(userMap);
+      } catch (error) {
+        console.error("Error loading transaction data:", error);
+      }
+    };
     
-    // Create user lookup map
-    const allUsers = getAllUsers();
-    const userMap: Record<string, User> = {};
-    allUsers.forEach(user => {
-      userMap[user.id] = user;
-      userMap[user.accountNumber] = user;
-    });
-    setUsers(userMap);
+    fetchData();
   }, []);
 
   useEffect(() => {

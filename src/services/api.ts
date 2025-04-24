@@ -1,8 +1,8 @@
 
-import { User, Transaction } from '../utils/mockData';
+import { User, Transaction } from '../types/banking';
 
 // Base API URL - in a real app, would come from environment variables
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:3001/api';
 
 // Helper function for making API requests
 const fetchWithErrorHandling = async (url: string, options: RequestInit = {}): Promise<any> => {
@@ -48,7 +48,12 @@ export const signupUser = async (
 
 // USER ENDPOINTS
 export const getCurrentUser = async (): Promise<User> => {
-  return fetchWithErrorHandling(`${API_BASE_URL}/users/me`);
+  // In a real app with JWT, we would validate the token here
+  // For now, we'll assume the user ID is stored in localStorage
+  const userId = localStorage.getItem('userId');
+  if (!userId) throw new Error('User not authenticated');
+  
+  return fetchWithErrorHandling(`${API_BASE_URL}/users/${userId}`);
 };
 
 export const getAllUsers = async (): Promise<User[]> => {
@@ -68,7 +73,7 @@ export const addUser = async (
 ): Promise<User> => {
   return fetchWithErrorHandling(`${API_BASE_URL}/users`, {
     method: 'POST',
-    body: JSON.stringify({ name, email, role }),
+    body: JSON.stringify({ name, email, password: 'defaultPassword123', role }),
   });
 };
 
@@ -82,35 +87,24 @@ export const getAllTransactions = async (): Promise<Transaction[]> => {
 };
 
 export const createTransaction = async (
+  senderId: string,
   receiverId: string,
   amount: number,
   description: string
 ): Promise<Transaction> => {
   return fetchWithErrorHandling(`${API_BASE_URL}/transactions`, {
     method: 'POST',
-    body: JSON.stringify({ receiverId, amount, description }),
+    body: JSON.stringify({ senderId, receiverId, amount, description }),
   });
 };
 
-// HELPER FUNCTIONS FOR TRANSITIONING FROM MOCK DATA
-// These functions check if we should use the live API or fall back to mock data
-// This allows for a gradual migration from mock to real data
-
 // Check if we have a valid API connection
-let isApiConnected: boolean | null = null;
-
 export const checkApiConnection = async (): Promise<boolean> => {
-  if (isApiConnected !== null) return isApiConnected;
-  
   try {
     await fetch(`${API_BASE_URL}/health`);
-    isApiConnected = true;
     return true;
   } catch (error) {
     console.warn('API connection failed, falling back to mock data');
-    isApiConnected = false;
     return false;
   }
 };
-
-// Fallback to mock data implementations will be in a separate file

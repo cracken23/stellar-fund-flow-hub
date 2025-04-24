@@ -1,13 +1,13 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllUsers, getAllTransactions } from "@/utils/mockData";
-import { Transaction, User } from "@/utils/mockData";
 import { Button } from "@/components/ui/button";
 import { ChartContainer } from "@/components/ui/chart";
-import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Link } from "react-router-dom";
 import { ArrowRight, CreditCard, User as UserIcon, ArrowLeftRight } from "lucide-react";
+import { getAllUsers, getAllTransactions } from "@/services/api";
+import { Transaction, User } from "@/types/banking";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,21 +17,29 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Load data
-    const allUsers = getAllUsers();
-    const allTransactions = getAllTransactions();
+    const fetchData = async () => {
+      try {
+        const allUsers = await getAllUsers();
+        const allTransactions = await getAllTransactions();
+        
+        setUsers(allUsers);
+        setTransactions(allTransactions);
+        
+        // Calculate total balance
+        const total = allUsers.reduce((sum, user) => sum + user.balance, 0);
+        setTotalBalance(total);
+        
+        // Calculate transaction volume
+        const volume = allTransactions
+          .filter(t => t.status === "completed")
+          .reduce((sum, t) => sum + t.amount, 0);
+        setTransactionVolume(volume);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      }
+    };
     
-    setUsers(allUsers);
-    setTransactions(allTransactions);
-    
-    // Calculate total balance
-    const total = allUsers.reduce((sum, user) => sum + user.balance, 0);
-    setTotalBalance(total);
-    
-    // Calculate transaction volume
-    const volume = allTransactions
-      .filter(t => t.status === "completed")
-      .reduce((sum, t) => sum + t.amount, 0);
-    setTransactionVolume(volume);
+    fetchData();
   }, []);
 
   // Generate transaction data by day for the chart

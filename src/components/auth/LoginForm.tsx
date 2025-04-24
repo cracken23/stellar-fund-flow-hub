@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { loginUser } from "@/services/api";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -22,9 +23,12 @@ const LoginForm = () => {
     }
     
     try {
+      const user = await loginUser(email, password);
+      // Store user ID for API calls
+      localStorage.setItem('userId', user.id);
       await login(email, password);
     } catch (error) {
-      // Error is handled in the auth context
+      toast.error("Invalid email or password");
     }
   };
 

@@ -3,19 +3,15 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Trash, Check, X } from "lucide-react";
-import { User, getAllUsers, removeUser, addUser } from "@/utils/mockData";
+import { Search, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader,
+  DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { User } from "@/types/banking";
+import { getAllUsers, deleteUser, addUser } from "@/services/api";
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -49,20 +45,25 @@ const UserManagement = () => {
     }
   }, [users, searchTerm]);
   
-  const loadUsers = () => {
-    const allUsers = getAllUsers();
-    setUsers(allUsers);
-    setFilteredUsers(allUsers);
+  const loadUsers = async () => {
+    try {
+      const allUsers = await getAllUsers();
+      setUsers(allUsers);
+      setFilteredUsers(allUsers);
+    } catch (error) {
+      toast.error("Failed to load users");
+      console.error(error);
+    }
   };
   
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     try {
       if (!newUser.name || !newUser.email) {
         toast.error("Name and email are required");
         return;
       }
       
-      addUser(newUser.name, newUser.email, newUser.role);
+      await addUser(newUser.name, newUser.email, newUser.role);
       toast.success("User added successfully");
       setDialogOpen(false);
       setNewUser({
@@ -70,19 +71,21 @@ const UserManagement = () => {
         email: "",
         role: "user",
       });
-      loadUsers();
+      await loadUsers();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to add user");
+      toast.error("Failed to add user");
+      console.error(error);
     }
   };
   
-  const handleRemoveUser = (userId: string) => {
+  const handleRemoveUser = async (userId: string) => {
     try {
-      removeUser(userId);
+      await deleteUser(userId);
       toast.success("User removed successfully");
-      loadUsers();
+      await loadUsers();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to remove user");
+      toast.error("Failed to remove user");
+      console.error(error);
     }
   };
 
