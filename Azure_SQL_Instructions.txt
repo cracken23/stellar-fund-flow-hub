@@ -26,62 +26,91 @@ a. Go to database's Networking settings
 b. Add client IP address
 c. Enable "Allow Azure services" if deploying to Azure
 
-4. Install Required Dependencies
+4. Set Up Database Schema
+------------------------
+a. Connect to your database using SSMS or Azure Data Studio
+b. Run the schema creation script from src/utils/dbSetup.ts
+   - This creates Users and Transactions tables
+   - Adds default test accounts
+
+5. Install Required Dependencies
 ------------------------------
 npm install mssql
 npm install dotenv
 
-5. Database Connection Setup
+6. Environment Configuration
+--------------------------
+a. Create a .env file in the project root:
+```
+# Azure SQL Database Connection
+SQL_SERVER=your-server.database.windows.net
+SQL_DATABASE=your-database-name
+SQL_USERNAME=your-username
+SQL_PASSWORD=your-password
+SQL_PORT=1433
+SQL_ENCRYPT=true
+
+# API Configuration
+NODE_ENV=production
+PORT=3001
+```
+
+b. Make sure .env is in .gitignore to prevent committing sensitive data
+
+7. Database Connection Setup
 ---------------------------
-a. Create connection configuration in your backend:
+The project has database utilities in src/utils/db.ts that handle:
+- Connection pooling for efficient resource use
+- Error handling for failed connections
+- Query execution with parameterization
 
-const config = {
-    server: 'your-server.database.windows.net',
-    database: 'your-database-name',
-    user: 'your-username',
-    password: 'your-password',
-    options: {
-        encrypt: true,
-        enableArithAbort: true
-    }
-};
-
-b. Test connection:
-
-const sql = require('mssql');
-
-async function testConnection() {
-    try {
-        await sql.connect(config);
-        console.log('Connected to Azure SQL Database');
-    } catch (err) {
-        console.error('Database connection failed:', err);
-    }
-}
-
-6. Security Best Practices
+8. Security Best Practices
 -------------------------
 - Store connection strings in environment variables
 - Use Azure Key Vault for production credentials
-- Implement connection pooling
+- Implement connection pooling (already done in the codebase)
 - Use Prepared Statements for queries
 - Regularly rotate database credentials
+- Enable Azure AD authentication where possible
 
-7. Deployment Steps
+9. Testing Database Connection
+----------------------------
+a. Use the test function in db.ts:
+```javascript
+import { testConnection } from './utils/db';
+
+// Test database connection
+const testDb = async () => {
+  const connected = await testConnection();
+  console.log(`Database connection: ${connected ? 'Success' : 'Failed'}`);
+};
+
+testDb();
+```
+
+10. Deployment Steps
 ------------------
 a. Set up environment variables in Azure App Service
-b. Update connection string in application settings
-c. Deploy backend application
-d. Test database connectivity
-e. Monitor performance in Azure Portal
+   - Go to App Service > Configuration > Application settings
+   - Add each environment variable from .env
+   
+b. Deploy backend application
+   - Use Azure DevOps, GitHub Actions, or direct deployment
+   - Make sure to deploy both frontend and API services
+   
+c. Test connectivity from your deployed app
+   - Monitor logs for connection errors
+   - Test endpoints through the application
 
-8. Troubleshooting
+11. Troubleshooting
 -----------------
-- Check firewall rules
-- Verify connection string
-- Ensure proper credentials
-- Check network connectivity
-- Review Azure SQL logs
+- Check firewall rules to ensure your services can connect
+- Verify connection string details are correct
+- Ensure proper database permissions are granted
+- Check network connectivity between app and database
+- Review Azure SQL logs in Azure Portal for errors
+- In Azure App Service, check Application Logs for connection issues
 
 For detailed documentation, visit:
 https://learn.microsoft.com/en-us/azure/azure-sql/database/connect-query-nodejs
+
